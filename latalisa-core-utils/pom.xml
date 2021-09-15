@@ -9,4 +9,11 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>latalisa-core-utils</artifactId>
+	<dependencies>
+		<dependency>
+			<groupId>org.eclipse</groupId>
+			<artifactId>yasson</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>

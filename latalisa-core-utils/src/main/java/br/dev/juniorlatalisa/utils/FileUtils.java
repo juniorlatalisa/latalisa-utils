@@ -161,6 +161,10 @@ public final class FileUtils {
 		return StringUtils.encodeHEX(CryptoUtils.encrypt(value, algorithm));
 	}
 
+	public static String checksum(byte[] value) {
+		return checksum(value, Constants.SHA256_ALGORITHM);
+	}
+
 	public static String checksum(Path path) {
 		return checksum(read(path), Constants.SHA256_ALGORITHM);
 	}

@@ -30,6 +30,7 @@ hs_err_pid*
 *.faces-config.xml.jsfdia
 *.tern-project
 *.externalToolBuilders
+MailUtilsTest.properties
 target
 teste.xhtml
 teste.properties

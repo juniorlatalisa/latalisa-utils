@@ -64,6 +64,11 @@
 				<artifactId>javax.el</artifactId>
 				<version>3.0.1-b12</version>
 			</dependency>
+			<dependency>
+				<groupId>org.eclipse</groupId>
+				<artifactId>yasson</artifactId>
+				<version>1.0.8</version>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
