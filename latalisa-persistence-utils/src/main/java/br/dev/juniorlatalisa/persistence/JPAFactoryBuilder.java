@@ -247,14 +247,7 @@ public class JPAFactoryBuilder {
 	 *      java.util.Map)
 	 */
 	public Properties getProperties() {
-		return getProperties(false);
-	}
-
-	protected Properties getProperties(boolean create) {
-		if ((create) && (properties == null)) {
-			properties = new Properties();
-		}
-		return properties;
+		return (properties == null) ? properties = new Properties() : properties;
 	}
 
 	/**
@@ -278,7 +271,7 @@ public class JPAFactoryBuilder {
 	 * @see Properties#putAll(java.util.Map)
 	 */
 	public JPAFactoryBuilder addProperties(Properties properties) {
-		getProperties(true).putAll(properties);
+		getProperties().putAll(properties);
 		return this;
 	}
 
@@ -291,7 +284,7 @@ public class JPAFactoryBuilder {
 	 * @see Properties#setProperty(String, String)
 	 */
 	public JPAFactoryBuilder setProperty(String key, String value) {
-		getProperties(true).setProperty(key, value);
+		getProperties().setProperty(key, value);
 		return this;
 	}
 
@@ -332,10 +325,8 @@ public class JPAFactoryBuilder {
 			private DataSource dataSource = JPAFactoryBuilder.this.getDataSource();
 			private ClassLoader classLoader = JPAFactoryBuilder.this.getClassLoader();
 			private String persistenceUnitName = JPAFactoryBuilder.this.getPersistenceUnitName();
-			private PersistenceUnitTransactionType transactionType = JPAFactoryBuilder.this
-					.getTransactionType();
-			private String persistenceProviderClassName = JPAFactoryBuilder.this
-					.getPersistenceProviderClassName();
+			private PersistenceUnitTransactionType transactionType = JPAFactoryBuilder.this.getTransactionType();
+			private String persistenceProviderClassName = JPAFactoryBuilder.this.getPersistenceProviderClassName();
 			private List<String> managedClassNames = new ArrayList<String>(
 					JPAFactoryBuilder.this.getManagedClassNames(true));
 

@@ -4,9 +4,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -51,16 +49,7 @@ public class JPAQueryTest {
 
 			@Override
 			public int execute(QueryStrategy queryStrategy, String queryValue, Map<String, Object> params) {
-				EntityTransaction transaction;
-				(transaction = entityManager.getTransaction()).begin();
-				try {
-					int retorno = super.execute(queryStrategy, queryValue, params);
-					transaction.commit();
-					return retorno;
-				} catch (PersistenceException e) {
-					transaction.rollback();
-					throw e;
-				}
+				return inEntityTransaction(() -> super.execute(queryStrategy, queryValue, params));
 			}
 
 		};

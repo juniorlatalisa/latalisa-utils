@@ -2,8 +2,10 @@ package br.dev.juniorlatalisa.persistence;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
@@ -114,6 +116,19 @@ public abstract class JPAQuery {
 			return getEntityManager().createNativeQuery(queryValue);
 		default:
 			throw new PersistenceException("QueryStrategy inválido: " + queryStrategy);
+		}
+	}
+
+	protected <T> T inEntityTransaction(Supplier<T> supplier) {
+		EntityTransaction transaction;
+		(transaction = getEntityManager().getTransaction()).begin();
+		try {
+			T retorno = supplier.get();
+			transaction.commit();
+			return retorno;
+		} catch (Throwable e) {
+			transaction.rollback();
+			throw e;
 		}
 	}
 
