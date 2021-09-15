@@ -7,6 +7,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.validation.constraints.Pattern;
+
+import br.dev.juniorlatalisa.Constants;
+import br.dev.juniorlatalisa.validations.CPFValidator.CPF;
 
 @Entity
 @SuppressWarnings("serial")
@@ -17,9 +21,9 @@ public class ModelEntity implements Entidade, Codificavel<Long> {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long codigo;
 
-	// TODO @CPF(required = true)
+	@CPF(required = true)
 	private String cpf;
-	// TODO @Pattern(regexp = Constants.EMAIL_PATTERN)
+	@Pattern(regexp = Constants.EMAIL_PATTERN)
 	private String email;
 
 	@Override
@@ -45,7 +49,7 @@ public class ModelEntity implements Entidade, Codificavel<Long> {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(cpf, email, codigo);
+		return Objects.hash(codigo, cpf, email);
 	}
 
 	@Override
@@ -57,13 +61,13 @@ public class ModelEntity implements Entidade, Codificavel<Long> {
 		if (getClass() != obj.getClass())
 			return false;
 		ModelEntity other = (ModelEntity) obj;
-		return Objects.equals(cpf, other.cpf) && Objects.equals(email, other.email)
-				&& Objects.equals(codigo, other.codigo);
+		return Objects.equals(codigo, other.codigo) && Objects.equals(cpf, other.cpf)
+				&& Objects.equals(email, other.email);
 	}
 
 	@Override
 	public String toString() {
-		return "PlusEntityTest [" + (codigo != null ? "id=" + codigo + ", " : "")
+		return "ModelEntity [" + (codigo != null ? "codigo=" + codigo + ", " : "")
 				+ (cpf != null ? "cpf=" + cpf + ", " : "") + (email != null ? "email=" + email : "") + "]";
 	}
 }

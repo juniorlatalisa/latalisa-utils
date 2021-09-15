@@ -13,7 +13,14 @@
 		<!-- Teste -->
 		<dependency>
 			<groupId>br.dev.juniorlatalisa.utils</groupId>
+			<artifactId>latalisa-core-utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>br.dev.juniorlatalisa.utils</groupId>
 			<artifactId>latalisa-persistence-utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
