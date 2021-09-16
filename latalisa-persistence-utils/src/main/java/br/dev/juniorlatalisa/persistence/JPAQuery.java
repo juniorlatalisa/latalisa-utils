@@ -1,11 +1,11 @@
 package br.dev.juniorlatalisa.persistence;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
@@ -119,19 +119,6 @@ public abstract class JPAQuery {
 		}
 	}
 
-	protected <T> T inEntityTransaction(Supplier<T> supplier) {
-		EntityTransaction transaction;
-		(transaction = getEntityManager().getTransaction()).begin();
-		try {
-			T retorno = supplier.get();
-			transaction.commit();
-			return retorno;
-		} catch (Throwable e) {
-			transaction.rollback();
-			throw e;
-		}
-	}
-
 	/**
 	 * @author Junior Latalisa
 	 */
@@ -157,5 +144,33 @@ public abstract class JPAQuery {
 		 * @see EntityManager#createNativeQuery(String)
 		 */
 		NATIVE
+	}
+
+	/*
+	 * 
+	 * EntityManager Facade para o CRUD
+	 * 
+	 */
+	public <T extends Serializable> T create(T entity) {
+		getEntityManager().persist(entity);
+		return entity;
+	}
+
+	public <T extends Serializable> T read(Class<T> entityClass, Serializable primaryKey) {
+		getEntityManager().clear();
+		return getEntityManager().find(entityClass, primaryKey);
+	}
+
+	public <T extends Serializable> T update(T entity) {
+		return getEntityManager().merge(entity);
+	}
+
+	public <T extends Serializable> boolean delete(Class<T> entityClass, Serializable primaryKey) {
+		try {
+			getEntityManager().remove(getEntityManager().getReference(entityClass, primaryKey));
+			return true;
+		} catch (EntityNotFoundException e) {
+			return false;
+		}
 	}
 }

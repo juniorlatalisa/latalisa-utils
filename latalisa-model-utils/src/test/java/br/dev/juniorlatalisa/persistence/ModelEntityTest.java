@@ -38,33 +38,33 @@ public class ModelEntityTest extends TesteEntidade<ModelEntity> {
 	protected ModelEntity criar() {
 		ModelEntity entity = new ModelEntity();
 		entity.setCpf("11144477735");
-		return persist(entity);
+		return getJPAQuery().create(entity);
 	}
 
 	@Override
 	protected ModelEntity alterar(ModelEntity entity) {
 		entity.setEmail("teste@teste.com.br");
-		return merge(entity);
+		return getJPAQuery().update(entity);
 	}
 
 	@Test(expected = ConstraintViolationException.class)
 	public void cfpNulo() {
 		ModelEntity entity = new ModelEntity();
-		Assert.assertNotNull(persist(entity).getCodigo());
+		Assert.assertNotNull(getJPAQuery().create(entity).getCodigo());
 	}
 
 	@Test(expected = ConstraintViolationException.class)
 	public void cfpVazio() {
 		ModelEntity entity = new ModelEntity();
 		entity.setCpf("");
-		Assert.assertNotNull(persist(entity).getCodigo());
+		Assert.assertNotNull(getJPAQuery().create(entity).getCodigo());
 	}
 
 	@Test(expected = ConstraintViolationException.class)
 	public void cfpInvalido() {
 		ModelEntity entity = new ModelEntity();
 		entity.setCpf("11144477733");
-		persist(entity);
+		getJPAQuery().create(entity);
 	}
 
 	@Test(expected = ConstraintViolationException.class)
@@ -72,6 +72,16 @@ public class ModelEntityTest extends TesteEntidade<ModelEntity> {
 		ModelEntity entity = new ModelEntity();
 		entity.setCpf("11144477735");
 		entity.setEmail("inválido");
-		persist(entity);
+		getJPAQuery().create(entity);
+	}
+
+	@Override
+	protected ModelEntity pesquisar(ModelEntity entidade) {
+		return getJPAQuery().read(ModelEntity.class, entidade.getCodigo());
+	}
+
+	@Override
+	protected boolean remover(ModelEntity entidade) {
+		return getJPAQuery().delete(ModelEntity.class, entidade.getCodigo());
 	}
 }

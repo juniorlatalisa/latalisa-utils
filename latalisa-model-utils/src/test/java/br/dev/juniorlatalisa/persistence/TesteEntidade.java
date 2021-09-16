@@ -3,14 +3,10 @@ package br.dev.juniorlatalisa.persistence;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityNotFoundException;
-import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.validation.Validation;
 import javax.validation.constraints.Size;
@@ -18,10 +14,7 @@ import javax.validation.constraints.Size;
 import org.junit.Assert;
 import org.junit.Test;
 
-import br.dev.juniorlatalisa.model.Codificavel;
 import br.dev.juniorlatalisa.model.Copiavel;
-import br.dev.juniorlatalisa.model.EntidadeComposta;
-import br.dev.juniorlatalisa.model.Identificavel;
 import br.dev.juniorlatalisa.model.Nomeavel;
 import br.dev.juniorlatalisa.model.NomeavelTest;
 import br.dev.juniorlatalisa.persistence.JPAQuery.QueryStrategy;
@@ -69,7 +62,7 @@ public abstract class TesteEntidade<E extends Serializable> {
 		}
 		if (facade == null) {
 			log.info("Validador configurado: " + Validation.buildDefaultValidatorFactory().getValidator());
-			facade = new JPAQuery() {
+			facade = new JPAQueryEntityTransaction() {
 
 				private final EntityManager entityManager = factory.createEntityManager();
 
@@ -77,12 +70,6 @@ public abstract class TesteEntidade<E extends Serializable> {
 				protected EntityManager getEntityManager() {
 					return entityManager;
 				}
-
-				@Override
-				public int execute(QueryStrategy queryStrategy, String queryValue, Map<String, Object> params) {
-					return inEntityTransaction(() -> super.execute(queryStrategy, queryValue, params));
-				}
-
 			};
 			if (loadQuery != null) {
 				createJPAQueryBuilder(QueryStrategy.NATIVE, loadQuery).execute();
@@ -95,78 +82,17 @@ public abstract class TesteEntidade<E extends Serializable> {
 	}
 
 	protected static JPAQueryBuilder createJPAQueryBuilder(QueryStrategy queryStrategy, String queryValue) {
-		return new JPAQueryBuilder(facade, queryStrategy, queryValue);
+		return new JPAQueryBuilder(getJPAQuery(), queryStrategy, queryValue);
 	}
 
 	protected static JPAQueryBuilder createNamedJPAQueryBuilder(String queryValue) {
-		return new JPAQueryBuilder(facade, QueryStrategy.NAMED, queryValue);
-	}
-
-	private static final ThreadLocal<EntityManager> entityManagers = new ThreadLocal<>();
-
-	protected static EntityManager getEntityManager() {
-		EntityManager em;
-		synchronized (entityManagers) {
-			if ((em = entityManagers.get()) == null || !em.isOpen()) {
-				entityManagers.set(em = factory.createEntityManager());
-			}
-		}
-		return em;
+		return new JPAQueryBuilder(getJPAQuery(), QueryStrategy.NAMED, queryValue);
 	}
 
 	protected abstract E criar();
 
 	protected void detach(Object entity) {
-		facade.getEntityManager().detach(entity);
-	}
-
-	protected E persist(E entity) {
-		runnableEntityTransaction(() -> getEntityManager().persist(entity));
-		return entity;
-	}
-
-	protected E merge(E entity) {
-		return supplierEntityTransaction(() -> getEntityManager().merge(entity));
-	}
-
-	protected boolean remove(E entity) {
-		try {
-			runnableEntityTransaction(() -> getEntityManager()
-					.remove(getEntityManager().getReference(entity.getClass(), getPrimaryKey((E) entity))));
-		} catch (EntityNotFoundException e) {
-			return false;
-		}
-		return true;
-	}
-
-	protected <T> T find(Class<T> entityClass, Object primaryKey) {
-		getEntityManager().clear();
-		return getEntityManager().find(entityClass, primaryKey);
-	}
-
-	protected void runnableEntityTransaction(Runnable runnable) {
-		EntityTransaction transaction;
-		(transaction = getEntityManager().getTransaction()).begin();
-		try {
-			runnable.run();
-			transaction.commit();
-		} catch (Throwable e) {
-			transaction.rollback();
-			throw e;
-		}
-	}
-
-	protected static <T> T supplierEntityTransaction(Supplier<T> supplier) {
-		EntityTransaction transaction;
-		(transaction = getEntityManager().getTransaction()).begin();
-		try {
-			T retorno = supplier.get();
-			transaction.commit();
-			return retorno;
-		} catch (Throwable e) {
-			transaction.rollback();
-			throw e;
-		}
+		getJPAQuery().getEntityManager().detach(entity);
 	}
 
 	protected EntityManagerFactory getFactory() {
@@ -179,19 +105,19 @@ public abstract class TesteEntidade<E extends Serializable> {
 			throw new RuntimeException("Não removeu");
 		}
 		destino.copiar(origem);
-		persist((E) destino);
+		getJPAQuery().create((E) destino);
 	}
 
 	@SuppressWarnings("unchecked")
 	protected void nomeVazio(Nomeavel entidade) {
 		entidade.setNome("");
-		merge((E) entidade);
+		getJPAQuery().update((E) entidade);
 	}
 
 	@SuppressWarnings("unchecked")
 	protected void nomeNulo(Nomeavel entidade) {
 		entidade.setNome(null);
-		merge((E) entidade);
+		getJPAQuery().update((E) entidade);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -218,35 +144,17 @@ public abstract class TesteEntidade<E extends Serializable> {
 		} else {
 			entidade.setNome(null);
 		}
-		merge((E) entidade);
+		getJPAQuery().update((E) entidade);
 	}
 
 	protected E alterar(E entidade) {
 		NomeavelTest.preencher((Nomeavel) entidade);
-		return merge(entidade);
+		return getJPAQuery().update(entidade);
 	}
 
-	protected Serializable getPrimaryKey(E entidade) {
-		if (entidade instanceof Codificavel<?>) {
-			return ((Codificavel<?>) entidade).getCodigo();
-		}
-		if (entidade instanceof EntidadeComposta) {
-			return ((EntidadeComposta) entidade).getId();
-		}
-		if (entidade instanceof Identificavel<?>) {
-			return ((Identificavel<?>) entidade).getIdentificador();
-		}
-		throw new IllegalAccessError("Unknow entity: " + entidade);
-	}
+	protected abstract E pesquisar(E entidade);
 
-	@SuppressWarnings("unchecked")
-	protected E pesquisar(E entidade) {
-		return (E) find(entidade.getClass(), getPrimaryKey(entidade));
-	}
-
-	protected boolean remover(E entidade) {
-		return remove(entidade);
-	}
+	protected abstract boolean remover(E entidade);
 
 	@Test
 	public void basico() {

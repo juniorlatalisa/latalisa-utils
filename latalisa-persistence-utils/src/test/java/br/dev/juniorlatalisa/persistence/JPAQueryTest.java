@@ -1,7 +1,5 @@
 package br.dev.juniorlatalisa.persistence;
 
-import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -38,7 +36,7 @@ public class JPAQueryTest {
 			em.close();
 		}
 
-		query = new JPAQuery() {
+		query = new JPAQueryEntityTransaction() {
 
 			private final EntityManager entityManager = factory.createEntityManager();
 
@@ -46,12 +44,6 @@ public class JPAQueryTest {
 			protected EntityManager getEntityManager() {
 				return entityManager;
 			}
-
-			@Override
-			public int execute(QueryStrategy queryStrategy, String queryValue, Map<String, Object> params) {
-				return inEntityTransaction(() -> super.execute(queryStrategy, queryValue, params));
-			}
-
 		};
 	}
 
