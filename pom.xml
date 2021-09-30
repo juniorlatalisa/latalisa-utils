@@ -11,6 +11,7 @@
 		<module>latalisa-core-utils</module>
 		<module>latalisa-persistence-utils</module>
 		<module>latalisa-model-utils</module>
+		<module>latalisa-rest-utils</module>
 	</modules>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
