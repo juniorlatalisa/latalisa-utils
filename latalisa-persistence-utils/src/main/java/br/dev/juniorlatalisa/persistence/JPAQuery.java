@@ -86,6 +86,7 @@ public abstract class JPAQuery {
 			int maxResults) {
 		Query query = createQuery(queryStrategy, queryValue, params);
 		setParams(queryStrategy, query, params, startResult, maxResults);
+		getEntityManager().clear();
 		return query.getResultList();
 	}
 

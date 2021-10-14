@@ -16,7 +16,6 @@ import org.junit.Test;
 
 import br.dev.juniorlatalisa.model.Copiavel;
 import br.dev.juniorlatalisa.model.Nomeavel;
-import br.dev.juniorlatalisa.model.NomeavelTest;
 import br.dev.juniorlatalisa.persistence.JPAQuery.QueryStrategy;
 
 public abstract class TesteEntidade<E extends Serializable> {
@@ -147,10 +146,7 @@ public abstract class TesteEntidade<E extends Serializable> {
 		getJPAQuery().update((E) entidade);
 	}
 
-	protected E alterar(E entidade) {
-		NomeavelTest.preencher((Nomeavel) entidade);
-		return getJPAQuery().update(entidade);
-	}
+	protected abstract E alterar(E entidade);
 
 	protected abstract E pesquisar(E entidade);
 

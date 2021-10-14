@@ -9,6 +9,21 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>latalisa-model-utils</artifactId>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
 		<!-- Teste -->
 		<dependency>
