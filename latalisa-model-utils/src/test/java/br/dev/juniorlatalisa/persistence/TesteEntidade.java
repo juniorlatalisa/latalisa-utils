@@ -33,7 +33,7 @@ public abstract class TesteEntidade<E extends Serializable> {
 		return factory;
 	}
 
-	protected static void beforeClass(String persistenceUnitName) {
+	public static void beforeClass(String persistenceUnitName) {
 		beforeClass(persistenceUnitName, null);
 	}
 
@@ -54,7 +54,7 @@ public abstract class TesteEntidade<E extends Serializable> {
 	 * @param persistenceUnitName
 	 * @param loadQuery
 	 */
-	protected static void beforeClass(String persistenceUnitName, InputStream loadQuery) {
+	public static void beforeClass(String persistenceUnitName, InputStream loadQuery) {
 		if (factory == null) {
 			factory = Persistence.createEntityManagerFactory(persistenceUnitName);
 			factory.createEntityManager().close();
@@ -80,11 +80,11 @@ public abstract class TesteEntidade<E extends Serializable> {
 		return createJPAQueryBuilder(queryStrategy, JPAQueryBuilder.load(queryValue, StandardCharsets.UTF_8));
 	}
 
-	protected static JPAQueryBuilder createJPAQueryBuilder(QueryStrategy queryStrategy, String queryValue) {
+	public static JPAQueryBuilder createJPAQueryBuilder(QueryStrategy queryStrategy, String queryValue) {
 		return new JPAQueryBuilder(getJPAQuery(), queryStrategy, queryValue);
 	}
 
-	protected static JPAQueryBuilder createNamedJPAQueryBuilder(String queryValue) {
+	public static JPAQueryBuilder createNamedJPAQueryBuilder(String queryValue) {
 		return new JPAQueryBuilder(getJPAQuery(), QueryStrategy.NAMED, queryValue);
 	}
 
