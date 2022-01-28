@@ -1,6 +1,7 @@
 package br.dev.juniorlatalisa.web.filter;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -10,6 +11,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.SessionCookieConfig;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletResponse;
 
@@ -33,18 +35,32 @@ import javax.servlet.http.HttpServletResponse;
  *      "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Headers/Strict-Transport-Security">Strict-Transport-Security</a>
  * @see <a href=
  *      "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Headers/X-Frame-Options">X-Frame-Options</a>
+ * @see <a href=
+ *      "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Headers/X-XSS-Protection">X-XSS-Protection</a>
+ * @see <a href=
+ *      "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Headers/X-Content-Type-Options">X-Content-Type-Options</a>
+ * @see <a href=
+ *      "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Headers/Referrer-Policy">Referrer-Policy</a>
+ * @see <a href=
+ *      "https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Headers/Content-Security-Policy">Content-Security-Policy</a>
+ * @see <a href= "https://observatory.mozilla.org/">observatory.mozilla.org</a>
  */
 @WebFilter(urlPatterns = "/*", displayName = "Segurança Básica", description = "Filtro para segurança básica da aplicação")
 public class BasicSecurityFilter implements Filter {
-
-//	http://www.mastertheboss.com/web/jboss-web-server/configuring-strict-transport-security-hsts-on-wildfly/
-//	https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Headers/Strict-Transport-Security
 
 	private boolean disableFilter;
 	// Strict-Transport-Security
 	private String directivesHSTS;
 	// X-Frame-Options
 	private XFrameOptions xFrameOption;
+	// X-XSS-Protection
+	private String directivesXXSSProtection;
+	// X-Content-Type-Options
+	private String directivesXContentTypeOptions;
+	// Referrer-Policy
+	private String directivesReferrerPolicy;
+	// Content-Security-Policy
+//	private String directivesCSP;
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
@@ -56,8 +72,18 @@ public class BasicSecurityFilter implements Filter {
 	}
 
 	protected void addHeader(HttpServletResponse response) {
-		response.addHeader("Strict-Transport-Security", this.directivesHSTS);
-		response.addHeader("X-Frame-Options", this.xFrameOption.name());
+//		addHeader(response, "Content-Security-Policy", this.directivesCSP);
+		addHeader(response, "Referrer-Policy", this.directivesReferrerPolicy);
+		addHeader(response, "Strict-Transport-Security", this.directivesHSTS);
+		addHeader(response, "X-Frame-Options", this.xFrameOption.name());
+		addHeader(response, "X-XSS-Protection", this.directivesXXSSProtection);
+		addHeader(response, "X-Content-Type-Options", this.directivesXContentTypeOptions);
+	}
+
+	protected void addHeader(HttpServletResponse response, String name, String value) {
+		if (!response.containsHeader(name)) {
+			response.addHeader(name, value);
+		}
 	}
 
 	@Override
@@ -81,6 +107,14 @@ public class BasicSecurityFilter implements Filter {
 		}
 		// X-Frame-Options
 		this.xFrameOption = XFrameOptions.valueOf(getInitParameter(filterConfig, "xFrameOption", "DENY"));
+		// X-XSS-Protection
+		this.directivesXXSSProtection = getInitParameter(filterConfig, "directivesXXSSProtection", "1; mode=block");
+		// X-Content-Type-Options
+		this.directivesXContentTypeOptions = getInitParameter(filterConfig, "directivesXContentTypeOptions", "nosniff");
+		// Referrer-Policy
+		this.directivesReferrerPolicy = getInitParameter(filterConfig, "directivesReferrerPolicy", "no-referrer");
+		// Content-Security-Policy
+//		this.directivesCSP = getInitParameter(filterConfig, "directivesCSP", "default-src 'self'");
 	}
 
 	protected String getInitParameter(FilterConfig filterConfig, String name, String def) {
@@ -88,12 +122,23 @@ public class BasicSecurityFilter implements Filter {
 		return value == null || value.isEmpty() ? def : value;
 	}
 
+	protected static boolean init(ServletContext servletContext) {
+		SessionCookieConfig sessionCookieConfig = servletContext.getSessionCookieConfig();
+		if (sessionCookieConfig == null) {
+			return false;
+		}
+		sessionCookieConfig.setSecure(true);
+		sessionCookieConfig.setHttpOnly(true);
+		sessionCookieConfig.setName("__Host-sess");
+		return sessionCookieConfig.isSecure() && sessionCookieConfig.isHttpOnly();
+	}
+
 	public static boolean init(ServletContext servletContext, boolean disableFilter) {
 		if (disableFilter) {
 			FilterRegistration reg = servletContext.getFilterRegistration(BasicSecurityFilter.class.getName());
-			return reg != null && reg.setInitParameter("disableFilter", "true");
+			return reg != null && init(servletContext) && reg.setInitParameter("csp", "true");
 		}
-		return true;
+		return init(servletContext);
 	}
 
 	/**
@@ -108,7 +153,7 @@ public class BasicSecurityFilter implements Filter {
 		if (reg == null) {
 			return false;
 		}
-		return reg.setInitParameter("maxAgeSeconds", Integer.toString(maxAgeSeconds))
+		return init(servletContext) && reg.setInitParameter("maxAgeSeconds", Integer.toString(maxAgeSeconds))
 				&& reg.setInitParameter("includeSubDomains", Boolean.toString(includeSubDomains))
 				&& reg.setInitParameter("preload", Boolean.toString(preload))
 				&& reg.setInitParameter("disableFilter", Boolean.toString(disableFilter));
@@ -122,7 +167,7 @@ public class BasicSecurityFilter implements Filter {
 	 */
 	public static boolean init(ServletContext servletContext, XFrameOptions option) {
 		FilterRegistration reg = servletContext.getFilterRegistration(BasicSecurityFilter.class.getName());
-		return reg != null && reg.setInitParameter("xFrameOption", option.name());
+		return init(servletContext) && reg != null && reg.setInitParameter("xFrameOption", option.name());
 	}
 
 	public static enum XFrameOptions {
@@ -140,5 +185,41 @@ public class BasicSecurityFilter implements Filter {
 		 * compatibility para mais detalhes de suporte.
 		 */
 		SAMEORIGIN,
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(directivesHSTS, directivesReferrerPolicy, directivesXContentTypeOptions,
+				directivesXXSSProtection, disableFilter, xFrameOption);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		BasicSecurityFilter other = (BasicSecurityFilter) obj;
+		return Objects.equals(directivesHSTS, other.directivesHSTS)
+				&& Objects.equals(directivesReferrerPolicy, other.directivesReferrerPolicy)
+				&& Objects.equals(directivesXContentTypeOptions, other.directivesXContentTypeOptions)
+				&& Objects.equals(directivesXXSSProtection, other.directivesXXSSProtection)
+				&& disableFilter == other.disableFilter && xFrameOption == other.xFrameOption;
+	}
+
+	@Override
+	public String toString() {
+		return "BasicSecurityFilter [disableFilter=" + disableFilter + ", "
+				+ (directivesHSTS != null ? "directivesHSTS=" + directivesHSTS + ", " : "")
+				+ (xFrameOption != null ? "xFrameOption=" + xFrameOption + ", " : "")
+				+ (directivesXXSSProtection != null ? "directivesXXSSProtection=" + directivesXXSSProtection + ", "
+						: "")
+				+ (directivesXContentTypeOptions != null
+						? "directivesXContentTypeOptions=" + directivesXContentTypeOptions + ", "
+						: "")
+				+ (directivesReferrerPolicy != null ? "directivesReferrerPolicy=" + directivesReferrerPolicy : "")
+				+ "]";
 	}
 }
