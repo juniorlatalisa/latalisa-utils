@@ -118,7 +118,7 @@ public class BasicSecurityFilter implements Filter {
 	}
 
 	protected String getInitParameter(FilterConfig filterConfig, String name, String def) {
-		String value = filterConfig.getInitParameter("maxAgeSeconds");
+		String value = filterConfig.getInitParameter(name);
 		return value == null || value.isEmpty() ? def : value;
 	}
 
@@ -136,7 +136,7 @@ public class BasicSecurityFilter implements Filter {
 	public static boolean init(ServletContext servletContext, boolean disableFilter) {
 		if (disableFilter) {
 			FilterRegistration reg = servletContext.getFilterRegistration(BasicSecurityFilter.class.getName());
-			return reg != null && init(servletContext) && reg.setInitParameter("csp", "true");
+			return reg != null && reg.setInitParameter("disableFilter", "true");
 		}
 		return init(servletContext);
 	}
