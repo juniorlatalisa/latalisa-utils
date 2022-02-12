@@ -30,6 +30,7 @@ public class EntityTest implements Serializable {
 	@NotEmpty
 	@Column(unique = true)
 	private String name;
+	@Column(name = "valor")
 	private Double value;
 
 	public Long getId() {
