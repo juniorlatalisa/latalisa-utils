@@ -20,7 +20,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
@@ -283,8 +282,13 @@ public class StringUtils {
 		return stringToDateTime(date, DateFormat.MEDIUM, DateFormat.MEDIUM, Constants.BRAZIL);
 	}
 
-	public static boolean matches(String regex, CharSequence input) {
-		return Pattern.compile(regex).matcher(input).matches();
+	public static boolean matches(String input, String... regexs) {
+		for (String regex : regexs) {
+			if (input.matches(regex)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static String encodeHEX(byte[] value) {
