@@ -9,7 +9,34 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>latalisa-persistence-utils</artifactId>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
+		<dependency>
+			<groupId>br.dev.juniorlatalisa.utils</groupId>
+			<artifactId>latalisa-core-utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>br.dev.juniorlatalisa.utils</groupId>
+			<artifactId>latalisa-model-utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
 		<!-- Teste -->
 		<dependency>
 			<groupId>org.hibernate</groupId>

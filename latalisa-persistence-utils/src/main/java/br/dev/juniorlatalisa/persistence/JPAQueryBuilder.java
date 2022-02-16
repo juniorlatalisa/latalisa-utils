@@ -29,7 +29,7 @@ public class JPAQueryBuilder {
 	private final QueryStrategy queryStrategy;
 	private final String queryValue;
 
-	private final transient JPAQuery facade;
+	private final JPAQuery facade;
 
 	public JPAQueryBuilder setMaxResults(int maxResults) {
 		this.maxResults = maxResults;

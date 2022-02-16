@@ -6,6 +6,7 @@ import java.util.function.Function;
  * @author juniorlatalisa
  *
  */
+@FunctionalInterface
 public interface Builder<T> {
 
 	T build();
