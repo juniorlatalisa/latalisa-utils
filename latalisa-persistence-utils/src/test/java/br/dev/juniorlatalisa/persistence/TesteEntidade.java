@@ -3,6 +3,7 @@ package br.dev.juniorlatalisa.persistence;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
@@ -33,10 +34,6 @@ public abstract class TesteEntidade<E extends Serializable> {
 		return factory;
 	}
 
-	public static void beforeClass(String persistenceUnitName) {
-		beforeClass(persistenceUnitName, null);
-	}
-
 	/**
 	 * &lt;dependency&gt;<br/>
 	 * &emsp;&lt;groupId&gt;org.glassfish&lt;/groupId&gt;<br/>
@@ -51,27 +48,32 @@ public abstract class TesteEntidade<E extends Serializable> {
 	 * &emsp;&lt;scope&gt;test&lt;/scope&gt;<br/>
 	 * &lt;/dependency&gt;<br/>
 	 * 
-	 * @param persistenceUnitName
-	 * @param loadQuery
 	 */
+	public static void beforeClass(String persistenceUnitName) {
+		beforeClass(persistenceUnitName, (Consumer<EntityManager>) null);
+	}
+
 	public static void beforeClass(String persistenceUnitName, InputStream loadQuery) {
+		beforeClass(persistenceUnitName,
+				entityManager -> createJPAQueryBuilder(QueryStrategy.NATIVE, loadQuery).execute());
+	}
+
+	public static void beforeClass(String persistenceUnitName, Consumer<EntityManager> consumer) {
 		if (factory == null) {
 			factory = Persistence.createEntityManagerFactory(persistenceUnitName);
 			factory.createEntityManager().close();
 		}
 		if (facade == null) {
 			log.info("Validador configurado: " + Validation.buildDefaultValidatorFactory().getValidator());
+			final EntityManager entityManager = factory.createEntityManager();
 			facade = new JPAQueryEntityTransaction() {
-
-				private final EntityManager entityManager = factory.createEntityManager();
-
 				@Override
 				protected EntityManager getEntityManager() {
 					return entityManager;
 				}
 			};
-			if (loadQuery != null) {
-				createJPAQueryBuilder(QueryStrategy.NATIVE, loadQuery).execute();
+			if (consumer != null) {
+				consumer.accept(entityManager);
 			}
 		}
 	}
@@ -98,13 +100,10 @@ public abstract class TesteEntidade<E extends Serializable> {
 		return factory;
 	}
 
-	@SuppressWarnings("unchecked")
-	protected void testeCopiavel(E origem, Copiavel<E> destino) {
-		if (!remover(origem)) {
-			throw new RuntimeException("Não removeu");
-		}
+	protected boolean testeCopiavel(Copiavel<E> destino) {
+		E origem = criar();
 		destino.copiar(origem);
-		getJPAQuery().create((E) destino);
+		return destino.equals(origem);
 	}
 
 	@SuppressWarnings("unchecked")
