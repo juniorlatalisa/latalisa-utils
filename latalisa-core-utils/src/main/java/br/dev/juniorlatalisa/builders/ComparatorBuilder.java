@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
-public class ComparatorBuilder<T> implements Builder<Comparator<T>> {
+public class ComparatorBuilder<T> {
 
 	public ComparatorBuilder() {
 		this(new LinkedList<>());
@@ -19,12 +19,18 @@ public class ComparatorBuilder<T> implements Builder<Comparator<T>> {
 
 	private final List<Comparator<T>> comparators;
 
-	@Override
 	public Comparator<T> build() {
 		return (value1, value2) -> compare(value1, value2, List.copyOf(comparators));
 	}
 
 	protected int compare(T value1, T value2, List<Comparator<T>> comparators) {
+		// Null será movido para o começo.
+		if (value1 == null) {
+			return -1;
+		}
+		if (value2 == null) {
+			return 1;
+		}
 		int value;
 		for (Comparator<T> comparator : comparators) {
 			if ((value = comparator.compare(value1, value2)) != 0) {
@@ -80,5 +86,9 @@ public class ComparatorBuilder<T> implements Builder<Comparator<T>> {
 
 	public static <E, C extends Comparable<C>> ComparatorBuilder<E> builder(Function<E, C> function) {
 		return new ComparatorBuilder<E>().add(function);
+	}
+
+	public static <E, C extends Comparable<C>> Comparator<E> build(Function<E, C> function) {
+		return new ComparatorBuilder<E>().createComparator(function);
 	}
 }
