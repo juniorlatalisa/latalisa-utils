@@ -48,8 +48,9 @@ public class JPAForeignKeyBuilder implements Builder<Integer> {
 
 	@Override
 	public Integer build() {
-		var sql = getForeignKeys().stream().map(this::buildIfNotExists).collect(Collectors.joining("\n"));
-		Logger.getLogger("JPAForeignKeyBuilder").info(sql);
+		var sql = getForeignKeys().stream().map(this::buildIfNotExists).sorted(String::compareTo)
+				.collect(Collectors.joining("\n"));
+		Logger.getLogger("JPAForeignKeyBuilder").info(() -> "Start JPAForeignKeyBuilder...\n" + sql);
 		return getFacade().execute(QueryStrategy.NATIVE, sql, Map.of());
 	}
 }
