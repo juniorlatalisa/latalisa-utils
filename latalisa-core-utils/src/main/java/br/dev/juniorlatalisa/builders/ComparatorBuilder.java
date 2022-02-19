@@ -23,7 +23,7 @@ public class ComparatorBuilder<T> {
 		return (value1, value2) -> compare(value1, value2, List.copyOf(comparators));
 	}
 
-	protected int compare(T value1, T value2, List<Comparator<T>> comparators) {
+	protected static <T> int compare(T value1, T value2, List<Comparator<T>> comparators) {
 		// Null será movido para o começo.
 		if (value1 == null) {
 			return -1;
@@ -40,24 +40,33 @@ public class ComparatorBuilder<T> {
 		return value1.equals(value2) ? 0 : -1;
 	}
 
-	@SafeVarargs
-	public final ComparatorBuilder<T> add(Comparator<T>... comparators) {
-		this.comparators.addAll(List.of(comparators));
+	public ComparatorBuilder<T> add(Comparator<T> comparator) {
+		this.comparators.add(comparator);
 		return this;
 	}
 
-	public final ComparatorBuilder<T> add(Collection<Comparator<T>> comparators) {
+	public ComparatorBuilder<T> add(Collection<Comparator<T>> comparators) {
 		this.comparators.addAll(comparators);
 		return this;
 	}
 
-	public final <C extends Comparable<C>> ComparatorBuilder<T> add(Function<T, C> function) {
+	public <C extends Comparable<C>> ComparatorBuilder<T> add(Function<T, C> function) {
 		this.comparators.add(createComparator(function));
 		return this;
 	}
 
+	public <C> ComparatorBuilder<T> add(Function<T, C> function, Comparator<C> comparator) {
+		this.comparators.add(createComparator(function, comparator));
+		return this;
+	}
+
 	protected <C extends Comparable<C>> Comparator<T> createComparator(Function<T, C> function) {
-		return (value1, value2) -> function.apply(value1).compareTo(function.apply(value2));
+		return createComparator(function, Comparable::compareTo);
+	}
+
+	protected <C> Comparator<T> createComparator(Function<T, C> function, Comparator<C> comparator) {
+		return (value1, value2) -> compare(value1 == null ? null : function.apply(value1),
+				value2 == null ? null : function.apply(value2), List.of(comparator));
 	}
 
 	@SafeVarargs
@@ -90,5 +99,13 @@ public class ComparatorBuilder<T> {
 
 	public static <E, C extends Comparable<C>> Comparator<E> build(Function<E, C> function) {
 		return new ComparatorBuilder<E>().createComparator(function);
+	}
+
+	public static <E, C> ComparatorBuilder<E> builder(Function<E, C> function, Comparator<C> comparator) {
+		return new ComparatorBuilder<E>().add(function, comparator);
+	}
+
+	public static <E, C> Comparator<E> build(Function<E, C> function, Comparator<C> comparator) {
+		return new ComparatorBuilder<E>().createComparator(function, comparator);
 	}
 }

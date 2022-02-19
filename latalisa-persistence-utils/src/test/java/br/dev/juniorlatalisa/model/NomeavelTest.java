@@ -21,14 +21,14 @@ public class NomeavelTest {
 	public void comparator() {
 		Object[] ordenado = letras.stream().sorted(Nomeavel.COMPARATOR_POR_NOME)
 				.map(l -> (l == null) ? null : l.getNome()).toArray();
-		Assert.assertEquals("Y", ordenado[0]);
+		Assert.assertEquals("Y", ordenado[2]);
 	}
 
 	@Test
 	public void comparatorIgnoreCase() {
 		Object[] ordenado = letras.stream().sorted(Nomeavel.COMPARATOR_POR_NOME_IGNORE_CASE)
 				.map(l -> (l == null) ? null : l.getNome()).toArray();
-		Assert.assertEquals("a", ordenado[0]);
+		Assert.assertEquals("a", ordenado[2]);
 	}
 
 }

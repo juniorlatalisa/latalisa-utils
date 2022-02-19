@@ -5,13 +5,14 @@ import java.util.Comparator;
 
 import javax.persistence.PersistenceException;
 
+import br.dev.juniorlatalisa.builders.ComparatorBuilder;
+
 @FunctionalInterface
 public interface Ativavel extends Serializable {
 
-	final Comparator<Ativavel> COMPARATOR_POR_ATIVO = (cn1, cn2) -> //
-	(cn1 == null || cn2 == null || cn1.getAtivo() == null) ? 0 : cn1.getAtivo().compareTo(cn2.getAtivo());
+	Comparator<Ativavel> COMPARATOR_POR_ATIVO = ComparatorBuilder.build(Ativavel::getAtivo);
 
-	final String NOT_NULL_MESSAGE = "{entidade.ativo.notnull}";
+	String NOT_NULL_MESSAGE = "{entidade.ativo.notnull}";
 
 	Boolean getAtivo();
 

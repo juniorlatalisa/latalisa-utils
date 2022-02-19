@@ -14,8 +14,7 @@ public class AtivavelTest {
 				null, () -> Boolean.TRUE);
 		letras.sort(Ativavel.COMPARATOR_POR_ATIVO);
 		Object[] ordenado = letras.stream().map(l -> (l == null) ? null : l.getAtivo()).toArray();
-		System.out.println(Arrays.toString(ordenado));
-		Assert.assertEquals(Boolean.FALSE, ordenado[0]);
+		Assert.assertEquals(Boolean.FALSE, ordenado[2]);
 	}
 
 }

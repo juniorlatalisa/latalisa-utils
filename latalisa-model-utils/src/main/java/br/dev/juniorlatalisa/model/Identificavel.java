@@ -5,16 +5,20 @@ import java.util.Comparator;
 
 import javax.persistence.PersistenceException;
 
+import br.dev.juniorlatalisa.builders.ComparatorBuilder;
+
 @FunctionalInterface
 public interface Identificavel<T extends Serializable> extends Serializable {
 
 	@SuppressWarnings("unchecked")
-	final Comparator<Identificavel<?>> COMPARATOR_POR_IDENTIFICADOR = (cn1, cn2) -> //
-	(cn1 == null || cn2 == null || cn1.getIdentificador() == null) ? 0
-			: ((Comparable<? super Serializable>) cn1.getIdentificador()).compareTo(cn2.getIdentificador());
+	Comparator<Identificavel<? extends Comparable<? extends Serializable>>> COMPARATOR_POR_IDENTIFICADOR = //
+			new ComparatorBuilder<Identificavel<? extends Comparable<? extends Serializable>>>()
+					.add(Identificavel::getIdentificador,
+							(value1, value2) -> ((Comparable<Serializable>) value1).compareTo(value2))
+					.build();
 
-	final int DEFAULT_MAX_SIZE = 255;
-	final String NOT_EMPTY_MESSAGE = "{entidade.identificador.notempty}";
+	int DEFAULT_MAX_SIZE = 255;
+	String NOT_EMPTY_MESSAGE = "{entidade.identificador.notempty}";
 
 	T getIdentificador();
 

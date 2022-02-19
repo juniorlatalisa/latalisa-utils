@@ -9,4 +9,12 @@
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>latalisa-model-utils</artifactId>
+	<dependencies>
+		<dependency>
+			<groupId>br.dev.juniorlatalisa.utils</groupId>
+			<artifactId>latalisa-core-utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 </project>
