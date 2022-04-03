@@ -11,7 +11,7 @@ package br.dev.juniorlatalisa.function;
  * @see java.util.function.BiConsumer
  */
 @FunctionalInterface
-public interface BiConsumerException<T, U, E extends Throwable> {
+public interface BiConsumerWithException<T, U, E extends Throwable> {
 
 	/**
 	 * Executa esta operação nos argumentos fornecidos e retorna a própria
@@ -34,7 +34,7 @@ public interface BiConsumerException<T, U, E extends Throwable> {
 	 * @see java.util.function.BiConsumer#accept(Object, Object)
 	 * @throws E exceção esperada pelo método
 	 */
-	default BiConsumerException<T, U, E> acceptAndThen(T t, U u) throws E {
+	default BiConsumerWithException<T, U, E> acceptAndThen(T t, U u) throws E {
 		accept(t, u);
 		return this;
 	}

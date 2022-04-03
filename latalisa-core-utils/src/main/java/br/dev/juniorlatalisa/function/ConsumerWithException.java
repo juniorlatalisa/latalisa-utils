@@ -11,7 +11,7 @@ package br.dev.juniorlatalisa.function;
  * @see java.util.function.Consumer
  */
 @FunctionalInterface
-public interface ConsumerException<T, E extends Throwable> {
+public interface ConsumerWithException<T, E extends Throwable> {
 
 	/**
 	 * Executa esta operação no argumento fornecido.
@@ -30,7 +30,7 @@ public interface ConsumerException<T, E extends Throwable> {
 	 * @see java.util.function.Consumer#accept(Object)
 	 * @throws E exceção esperada pelo método
 	 */
-	default ConsumerException<T, E> acceptAndThen(T t) throws E {
+	default ConsumerWithException<T, E> acceptAndThen(T t) throws E {
 		accept(t);
 		return this;
 	}
