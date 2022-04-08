@@ -2,7 +2,9 @@ package br.dev.juniorlatalisa.builders;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.function.BinaryOperator;
 
 /**
  * @author juniorlatalisa
@@ -51,20 +53,25 @@ public class SetBuilder<E> implements Builder<Set<E>> {
 
 	@SafeVarargs
 	public static <E> SetBuilder<E> builder(E element, E... more) {
-		return new SetBuilder<E>(build(element, more));
+		return new SetBuilder<>(build(element, more));
 	}
 
 	public static <E> SetBuilder<E> builder(Collection<E> elements) {
-		return new SetBuilder<E>(new HashSet<E>(elements));
+		return new SetBuilder<>(new HashSet<>(elements));
 	}
 
 	@SafeVarargs
 	public static <E> Set<E> build(E element, E... more) {
-		Set<E> source = new HashSet<E>(more.length + 1);
+		Set<E> source = new HashSet<>(more.length + 1);
 		source.add(element);
-		for (E e : more) {
-			source.add(e);
-		}
+		source.addAll(List.of(more));
 		return source;
+	}
+
+	public static <E> BinaryOperator<Set<E>> binaryOperator() {
+		return (acumulador, novo) -> {
+			(acumulador == null ? acumulador = new HashSet<>() : acumulador).addAll(novo == null ? Set.of() : novo);
+			return acumulador;
+		};
 	}
 }

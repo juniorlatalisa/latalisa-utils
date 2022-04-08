@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BinaryOperator;
 import java.util.function.Supplier;
 
 /**
@@ -73,34 +74,33 @@ public class ListBuilder<E> implements Builder<List<E>> {
 	}
 
 	public static <E> ListBuilder<E> builder() {
-		return new ListBuilder<E>();
+		return new ListBuilder<>();
 	}
 
 	@SafeVarargs
 	public static <E> ListBuilder<E> builder(E element, E... more) {
-		return new ListBuilder<E>(build(element, more));
+		return new ListBuilder<>(build(element, more));
 	}
 
 	public static <E> ListBuilder<E> builder(Collection<E> elements) {
-		return new ListBuilder<E>(new ArrayList<E>(elements));
+		return new ListBuilder<>(new ArrayList<>(elements));
 	}
 
 	@SafeVarargs
 	public static <E> List<E> build(E element, E... more) {
-		List<E> source = new ArrayList<E>(more.length + 1);
+		List<E> source = new ArrayList<>(more.length + 1);
 		source.add(element);
-		for (E e : more) {
-			source.add(e);
-		}
+		source.addAll(List.of(more));
 		return source;
 	}
 
 	public static <E> List<E> lazy(Supplier<E[]> constructor) {
+		final Object sync = constructor;
 		return new AbstractList<E>() {
 			private E[] source = null;
 
 			private E[] getSource() {
-				synchronized (constructor) {
+				synchronized (sync) {
 					if (source == null) {
 						source = constructor.get();
 					}
@@ -117,6 +117,13 @@ public class ListBuilder<E> implements Builder<List<E>> {
 			public int size() {
 				return getSource().length;
 			}
+		};
+	}
+
+	public static <E> BinaryOperator<List<E>> binaryOperator() {
+		return (acumulador, novo) -> {
+			(acumulador == null ? acumulador = new ArrayList<>() : acumulador).addAll(novo == null ? List.of() : novo);
+			return acumulador;
 		};
 	}
 }
