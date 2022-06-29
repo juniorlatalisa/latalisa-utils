@@ -29,6 +29,13 @@ public class MapBuilder<K, V> implements Builder<Map<K, V>> {
 		return this;
 	}
 
+	public MapBuilder<K, V> putIfNotNull(K key, V value) {
+		if (value != null) {
+			source.put(key, value);
+		}
+		return this;
+	}
+
 	public MapBuilder<K, V> remove(K key) {
 		source.remove(key);
 		return this;
@@ -51,6 +58,10 @@ public class MapBuilder<K, V> implements Builder<Map<K, V>> {
 
 	public static <K, V> MapBuilder<K, V> builder(Map<K, V> elements) {
 		return new MapBuilder<>(new HashMap<>(elements));
+	}
+
+	public static <K, V> MapBuilder<K, V> builder() {
+		return new MapBuilder<>(new HashMap<>());
 	}
 
 	@SafeVarargs

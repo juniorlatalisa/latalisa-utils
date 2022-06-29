@@ -1,7 +1,6 @@
 package br.dev.juniorlatalisa.utils;
 
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +22,7 @@ import java.util.function.Supplier;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.xml.bind.DatatypeConverter;
 
 import br.dev.juniorlatalisa.Constants;
 import br.dev.juniorlatalisa.builders.MapBuilder;
@@ -292,11 +292,11 @@ public class StringUtils {
 	}
 
 	public static String encodeHEX(byte[] value) {
-		return new BigInteger(1, value).toString(16);
+		return DatatypeConverter.printHexBinary(value).toLowerCase();
 	}
 
 	public static byte[] decodeHEX(String value) {
-		return new BigInteger(value, 16).toByteArray();
+		return DatatypeConverter.parseHexBinary(value);
 	}
 
 	public static <T> T decodeHEX(String value, Function<byte[], T> converter) {
@@ -366,9 +366,10 @@ public class StringUtils {
 		return jsonb;
 	}
 
+	@SafeVarargs
 	public static boolean isNotEmpty(String... values) {
 		for (String value : values) {
-			if ((value == null) || (value.isEmpty())) {
+			if (value == null || value.isBlank()) {
 				return false;
 			}
 		}
