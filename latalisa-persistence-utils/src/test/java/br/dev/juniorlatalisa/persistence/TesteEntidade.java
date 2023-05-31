@@ -9,13 +9,16 @@ import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.PersistenceException;
 import javax.validation.Validation;
 import javax.validation.constraints.Size;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import br.dev.juniorlatalisa.model.Codificavel;
 import br.dev.juniorlatalisa.model.Copiavel;
+import br.dev.juniorlatalisa.model.Identificavel;
 import br.dev.juniorlatalisa.model.Nomeavel;
 import br.dev.juniorlatalisa.persistence.JPAQuery.QueryStrategy;
 
@@ -66,12 +69,7 @@ public abstract class TesteEntidade<E extends Serializable> {
 		if (facade == null) {
 			log.info("Validador configurado: " + Validation.buildDefaultValidatorFactory().getValidator());
 			final EntityManager entityManager = factory.createEntityManager();
-			facade = new JPAQueryEntityTransaction() {
-				@Override
-				protected EntityManager getEntityManager() {
-					return entityManager;
-				}
-			};
+			facade = JPAQueryEntityTransaction.create(entityManager);
 			if (consumer != null) {
 				consumer.accept(entityManager);
 			}
@@ -79,7 +77,7 @@ public abstract class TesteEntidade<E extends Serializable> {
 	}
 
 	public static JPAQueryBuilder createJPAQueryBuilder(QueryStrategy queryStrategy, InputStream queryValue) {
-		return createJPAQueryBuilder(queryStrategy, JPAQueryBuilder.load(queryValue, StandardCharsets.UTF_8));
+		return createJPAQueryBuilder(queryStrategy, QueryBuilder.load(queryValue, StandardCharsets.UTF_8));
 	}
 
 	public static JPAQueryBuilder createJPAQueryBuilder(QueryStrategy queryStrategy, String queryValue) {
@@ -101,7 +99,10 @@ public abstract class TesteEntidade<E extends Serializable> {
 	}
 
 	protected boolean testeCopiavel(Copiavel<E> destino) {
-		E origem = criar();
+		return testeCopiavel(criar(), destino);
+	}
+
+	protected boolean testeCopiavel(E origem, Copiavel<E> destino) {
 		destino.copiar(origem);
 		return destino.equals(origem);
 	}
@@ -145,11 +146,30 @@ public abstract class TesteEntidade<E extends Serializable> {
 		getJPAQuery().update((E) entidade);
 	}
 
-	protected abstract E alterar(E entidade);
+	protected Serializable getPrimaryKey(E entidade) {
+		if (entidade instanceof Codificavel<?>) {
+			return ((Codificavel<?>) entidade).getCodigo();
+		}
+		if (entidade instanceof Identificavel<?>) {
+			return ((Identificavel<?>) entidade).getIdentificador();
+		}
+		throw new PersistenceException(String.format("Favor informaro método 'getPrimaryKey' para a classe %s", //
+				entidade.getClass()));
+	}
 
-	protected abstract E pesquisar(E entidade);
+	protected E alterar(E entidade) {
+		return getJPAQuery().update(entidade);
+	}
 
-	protected abstract boolean remover(E entidade);
+	@SuppressWarnings("unchecked")
+	protected E pesquisar(E entidade) {
+		;
+		return (E) getJPAQuery().read(entidade.getClass(), getPrimaryKey(entidade));
+	}
+
+	protected boolean remover(E entidade) {
+		return getJPAQuery().delete(entidade.getClass(), getPrimaryKey(entidade));
+	}
 
 	@Test
 	public void basico() {

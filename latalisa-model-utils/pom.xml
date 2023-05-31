@@ -13,7 +13,7 @@
 		<dependency>
 			<groupId>br.dev.juniorlatalisa.utils</groupId>
 			<artifactId>latalisa-core-utils</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
 public abstract class JPAQueryEntityTransaction extends JPAQuery {
@@ -39,5 +40,22 @@ public abstract class JPAQueryEntityTransaction extends JPAQuery {
 	@Override
 	public <T extends Serializable> boolean delete(Class<T> entityClass, Serializable primaryKey) {
 		return inEntityTransaction(() -> super.delete(entityClass, primaryKey));
+	}
+
+	public boolean isOpen() {
+		return getEntityManager().isOpen();
+	}
+
+	public void close() {
+		getEntityManager().close();
+	}
+
+	public static JPAQueryEntityTransaction create(EntityManager entityManager) {
+		return new JPAQueryEntityTransaction() {
+			@Override
+			protected EntityManager getEntityManager() {
+				return entityManager;
+			}
+		};
 	}
 }

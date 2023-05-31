@@ -76,12 +76,7 @@ public class ModelEntityTest extends TesteEntidade<ModelEntity> {
 	}
 
 	@Override
-	protected ModelEntity pesquisar(ModelEntity entidade) {
-		return getJPAQuery().read(ModelEntity.class, entidade.getCodigo());
-	}
-
-	@Override
-	protected boolean remover(ModelEntity entidade) {
-		return getJPAQuery().delete(ModelEntity.class, entidade.getCodigo());
+	protected Long getPrimaryKey(ModelEntity entidade) {
+		return entidade.getCodigo();
 	}
 }

@@ -1,20 +1,16 @@
 package br.dev.juniorlatalisa.persistence;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
 
 import javax.persistence.PersistenceException;
 
 import br.dev.juniorlatalisa.persistence.JPAQuery.QueryStrategy;
+import br.dev.juniorlatalisa.utils.ObjectUtils;
 
-public class JPAQueryBuilder {
+public class JPAQueryBuilder implements QueryBuilder {
 
 	public JPAQueryBuilder(JPAQuery facade, QueryStrategy queryStrategy, String queryValue) {
 		this.queryStrategy = queryStrategy;
@@ -24,8 +20,8 @@ public class JPAQueryBuilder {
 
 	private int maxResults = JPAQuery.MAX_RESULT_NONE;
 	private int startResult = JPAQuery.START_RESULT_NONE;
-	private Map<String, Object> params = new HashMap<>();
 
+	private final Map<String, Object> params = new HashMap<>();
 	private final QueryStrategy queryStrategy;
 	private final String queryValue;
 
@@ -42,7 +38,10 @@ public class JPAQueryBuilder {
 	}
 
 	public JPAQueryBuilder setParams(Map<String, Object> params) {
-		this.params = params;
+		this.params.clear();
+		if (!ObjectUtils.isEmpty(params)) {
+			this.params.putAll(params);
+		}
 		return this;
 	}
 
@@ -56,6 +55,7 @@ public class JPAQueryBuilder {
 		return this;
 	}
 
+	@Override
 	public JPAQueryBuilder clearParams() {
 		params.clear();
 		return this;
@@ -74,51 +74,29 @@ public class JPAQueryBuilder {
 		return setStartResult(JPAQuery.START_RESULT_NONE);
 	}
 
+	public <T> T single() {
+		return facade.single(queryStrategy, queryValue, params);
+	}
+
+	@Override
 	public <T> T find() {
 		List<T> result = facade.list(queryStrategy, queryValue, params, startResult, 1);
 		return (result == null || result.isEmpty()) ? null : result.get(0);
 	}
 
-	public <T, R> R find(Function<T, R> function) {
-		return function.apply(find());
-	}
-
-	public <T> Optional<T> optional() {
-		return Optional.ofNullable(find());
-	}
-
+	@Override
 	public int execute() {
 		return facade.execute(queryStrategy, queryValue, params);
 	}
 
+	@Override
 	public <T> List<T> list() {
 		return facade.list(queryStrategy, queryValue, params, startResult, maxResults);
 	}
 
-	public <T> T single() {
-		return facade.single(queryStrategy, queryValue, params);
+	@Override
+	public <T> Iterator<T> iterator() {
+		throw new PersistenceException("Iterator is not suported.");
 	}
 
-	public <T, R> R list(Function<List<T>, R> function) {
-		return function.apply(list());
-	}
-
-	public static String load(InputStream is, Charset charset) {
-		String sql;
-		try {
-			try {
-				byte[] buffer = new byte[is.available()];
-				is.read(buffer);
-				sql = new String(buffer, charset);
-			} finally {
-				is.close();
-			}
-		} catch (IOException e) {
-			throw new PersistenceException(e);
-		}
-		if ((StandardCharsets.UTF_8.equals(charset)) && (sql.contains(JPAQuery.UTF8_BOM))) {
-			sql = sql.replace(JPAQuery.UTF8_BOM, "");
-		}
-		return sql;
-	}
 }
