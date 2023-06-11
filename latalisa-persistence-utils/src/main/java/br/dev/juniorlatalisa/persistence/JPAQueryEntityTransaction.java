@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 
-public abstract class JPAQueryEntityTransaction extends JPAQuery {
+public abstract class JPAQueryEntityTransaction extends JPAQuery implements AutoCloseable {
 
 	protected <T> T inEntityTransaction(Supplier<T> supplier) {
 		EntityTransaction transaction;
@@ -46,6 +46,7 @@ public abstract class JPAQueryEntityTransaction extends JPAQuery {
 		return getEntityManager().isOpen();
 	}
 
+	@Override
 	public void close() {
 		getEntityManager().close();
 	}

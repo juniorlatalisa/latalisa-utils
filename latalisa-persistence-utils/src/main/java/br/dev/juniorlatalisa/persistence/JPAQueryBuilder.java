@@ -1,25 +1,29 @@
 package br.dev.juniorlatalisa.persistence;
 
+import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.Entity;
 import javax.persistence.PersistenceException;
 
+import br.dev.juniorlatalisa.model.Entidade;
 import br.dev.juniorlatalisa.persistence.JPAQuery.QueryStrategy;
 import br.dev.juniorlatalisa.utils.ObjectUtils;
 
 public class JPAQueryBuilder implements QueryBuilder {
 
-	public JPAQueryBuilder(JPAQuery facade, QueryStrategy queryStrategy, String queryValue) {
+	protected JPAQueryBuilder(JPAQuery facade, QueryStrategy queryStrategy, String queryValue) {
 		this.queryStrategy = queryStrategy;
 		this.queryValue = queryValue;
 		this.facade = facade;
 	}
 
-	private int maxResults = JPAQuery.MAX_RESULT_NONE;
-	private int startResult = JPAQuery.START_RESULT_NONE;
+	private int maxResults = QueryFacade.MAX_RESULT_NONE;
+	private int startResult = QueryFacade.START_RESULT_NONE;
 
 	private final Map<String, Object> params = new HashMap<>();
 	private final QueryStrategy queryStrategy;
@@ -97,6 +101,25 @@ public class JPAQueryBuilder implements QueryBuilder {
 	@Override
 	public <T> Iterator<T> iterator() {
 		throw new PersistenceException("Iterator is not suported.");
+	}
+
+	public static JPAQueryBuilder create(JPAQuery facade, QueryStrategy queryStrategy, String queryValue) {
+		return new JPAQueryBuilder(facade, queryStrategy, queryValue);
+	}
+
+	public static JPAQueryBuilder create(JPAQuery facade, QueryStrategy queryStrategy, InputStream is,
+			Charset charset) {
+		return new JPAQueryBuilder(facade, queryStrategy, QueryBuilder.load(is, charset));
+	}
+
+	public static JPAQueryBuilder create(JPAQuery facade, Class<? extends Entidade> entityClass, String where) {
+		final Entity entity = entityClass.getAnnotation(Entity.class);
+		return new JPAQueryBuilder(facade, QueryStrategy.DEFAULT, String.format("select e from %s e %s",
+				entity == null ? entityClass.getSimpleName() : entity.name(), where));
+	}
+
+	public static JPAQueryBuilder create(JPAQuery facade, Class<? extends Entidade> entityClass) {
+		return create(facade, entityClass, "");
 	}
 
 }

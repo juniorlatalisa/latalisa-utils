@@ -319,6 +319,10 @@ public class JPAFactoryBuilder {
 		return pp.createContainerEntityManagerFactory(createPersistenceUnitInfo(), getProperties());
 	}
 
+	public static JPAFactoryBuilder create() {
+		return new JPAFactoryBuilder();
+	}
+
 	protected PersistenceUnitInfo createPersistenceUnitInfo() {
 		return new PersistenceUnitInfo() {
 
