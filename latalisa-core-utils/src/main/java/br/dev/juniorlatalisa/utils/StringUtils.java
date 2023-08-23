@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
 import javax.xml.bind.DatatypeConverter;
 
 import br.dev.juniorlatalisa.Constants;
@@ -361,7 +362,8 @@ public class StringUtils {
 
 	private static Jsonb getJsonb() {
 		if (jsonb == null) {
-			jsonb = JsonbBuilder.create();
+			final JsonbConfig config = new JsonbConfig().withFormatting(true);
+			jsonb = JsonbBuilder.create(config);
 		}
 		return jsonb;
 	}

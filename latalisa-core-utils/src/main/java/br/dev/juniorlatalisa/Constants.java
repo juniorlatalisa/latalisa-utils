@@ -26,6 +26,10 @@ public interface Constants {
 
 	String BRAZIL_TIME_PATTERN = "HH:mm:ss";
 
+	String ISO_8601_LOCAL_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
+
+	String ISO_8601_ZONED_DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ssX";
+
 	DateTimeFormatter BRAZIL_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern(BRAZIL_DATE_TIME_PATTERN, BRAZIL);
 
 	DateTimeFormatter BRAZIL_DATE_FORMATTER = DateTimeFormatter.ofPattern(BRAZIL_DATE_PATTERN, BRAZIL);
