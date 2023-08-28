@@ -2,6 +2,7 @@ package br.dev.juniorlatalisa.builders;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +22,10 @@ public class ComparatorBuilder<T> {
 
 	public Comparator<T> build() {
 		return (value1, value2) -> compare(value1, value2, List.copyOf(comparators));
+	}
+
+	public Comparator<T> buildReverseOrder() {
+		return Collections.reverseOrder(build());
 	}
 
 	protected static <T> int compare(T value1, T value2, List<Comparator<T>> comparators) {
