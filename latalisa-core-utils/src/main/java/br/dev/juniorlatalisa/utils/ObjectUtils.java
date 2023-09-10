@@ -102,4 +102,11 @@ public final class ObjectUtils {
 	public static boolean isEmpty(Number value) {
 		return value == null || value.doubleValue() == 0.0;
 	}
+
+	public static Throwable getCause(Throwable throwable) {
+		if (throwable.getCause() == null || throwable.equals(throwable.getCause())) {
+			return throwable.getCause() == null ? throwable : throwable.getCause();
+		}
+		return getCause(throwable.getCause());
+	}
 }
