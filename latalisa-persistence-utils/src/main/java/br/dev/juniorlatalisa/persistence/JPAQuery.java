@@ -9,6 +9,8 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
+import br.dev.juniorlatalisa.utils.ObjectUtils;
+
 /**
  * @author Junior Latalisa
  */
@@ -27,7 +29,7 @@ public abstract class JPAQuery implements QueryFacade {
 	@SuppressWarnings("unchecked")
 	public <T> T single(QueryStrategy queryStrategy, String queryValue, Map<String, Object> params) {
 		Query query = createQuery(queryStrategy, queryValue, params);
-		setParams(queryStrategy, query, params, JPAQuery.START_RESULT_NONE, JPAQuery.MAX_RESULT_NONE);
+		setParams(queryStrategy, query, params, START_RESULT_NONE, MAX_RESULT_NONE);
 		return (T) query.getSingleResult();
 	}
 
@@ -42,6 +44,11 @@ public abstract class JPAQuery implements QueryFacade {
 		Query query = createQuery(queryStrategy, queryValue, params);
 		setParams(queryStrategy, query, params);
 		return query.executeUpdate();
+	}
+
+	@Override
+	public int execute(String queryValue) {
+		return execute(QueryStrategy.NATIVE, queryValue, null);
 	}
 
 	/**
@@ -65,19 +72,19 @@ public abstract class JPAQuery implements QueryFacade {
 
 	protected void setParams(QueryStrategy queryStrategy, Query query, Map<String, Object> params, int startResult,
 			int maxResults) {
-		if (startResult != JPAQuery.START_RESULT_NONE) {
+		if (startResult != START_RESULT_NONE) {
 			query.setFirstResult(startResult);
 		}
-		if (maxResults != JPAQuery.MAX_RESULT_NONE) {
+		if (maxResults != MAX_RESULT_NONE) {
 			query.setMaxResults(maxResults);
 		}
-		if (!(params == null || params.isEmpty())) {
-			setParams(queryStrategy, query, params);
-		}
+		setParams(queryStrategy, query, params);
 	}
 
 	protected void setParams(QueryStrategy queryStrategy, Query query, Map<String, Object> params) {
-		params.forEach((name, value) -> query.setParameter(name, value));
+		if (!ObjectUtils.isEmpty(params)) {
+			params.forEach(query::setParameter);
+		}
 	}
 
 	protected Query createQuery(QueryStrategy queryStrategy, String queryValue, Map<String, Object> params) {

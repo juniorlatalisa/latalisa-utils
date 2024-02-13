@@ -29,4 +29,8 @@ public interface QueryFacade {
 	 */
 	static final int EXECUTE_RESULT_NONE = -1;
 
+	/**
+	 * Executar uma query nativa sem nenhum parâmetro.
+	 */
+	int execute(String queryValue);
 }

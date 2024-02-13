@@ -25,12 +25,12 @@ public abstract class JDBCQuery implements QueryFacade, AutoCloseable {
 	}
 
 	protected Statement createStatement(int startResult) throws SQLException {
-		return (QueryFacade.START_RESULT_NONE == startResult) ? getConnection().createStatement()
+		return (START_RESULT_NONE == startResult) ? getConnection().createStatement()
 				: getConnection().createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
 	}
 
 	protected PreparedStatement createPreparedStatement(String queryValue, int startResult) throws SQLException {
-		return (QueryFacade.START_RESULT_NONE == startResult) ? getConnection().prepareStatement(queryValue)
+		return (START_RESULT_NONE == startResult) ? getConnection().prepareStatement(queryValue)
 				: getConnection().prepareStatement(queryValue, ResultSet.TYPE_SCROLL_SENSITIVE,
 						ResultSet.CONCUR_READ_ONLY);
 	}
@@ -44,14 +44,19 @@ public abstract class JDBCQuery implements QueryFacade, AutoCloseable {
 	}
 
 	public int execute(String queryValue, List<Object> params) {
-		try (Statement statement = ObjectUtils.isEmpty(params) ? createStatement(QueryFacade.START_RESULT_NONE)
-				: createPreparedStatement(queryValue, QueryFacade.START_RESULT_NONE)) {
+		try (Statement statement = ObjectUtils.isEmpty(params) ? createStatement(START_RESULT_NONE)
+				: createPreparedStatement(queryValue, START_RESULT_NONE)) {
 			return (statement instanceof PreparedStatement) //
 					? setParams((PreparedStatement) statement, params).executeUpdate() //
 					: statement.executeUpdate(queryValue);
 		} catch (SQLException e) {
 			throw new PersistenceException(e);
 		}
+	}
+
+	@Override
+	public int execute(String queryValue) {
+		return execute(queryValue, null);
 	}
 
 	public static JDBCQuery create(Connection connection) {
