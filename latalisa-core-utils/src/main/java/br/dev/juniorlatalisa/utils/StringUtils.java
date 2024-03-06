@@ -1,6 +1,7 @@
 package br.dev.juniorlatalisa.utils;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -354,8 +355,13 @@ public class StringUtils {
 	/**
 	 * @see Jsonb#fromJson(String, Class)
 	 */
-	public static <T> T decodeJSON(String value, Class<T> type) {
-		return getJsonb().fromJson(value, type);
+	public static <T> T decodeJSON(String value, Class<T> clazz) {
+		return getJsonb().fromJson(value, clazz);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T> T[] decodeJSONArray(String value, Class<T> clazz) {
+		return (T[]) decodeJSON(value, Array.newInstance(clazz, 0).getClass());
 	}
 
 	private static Jsonb jsonb = null;
