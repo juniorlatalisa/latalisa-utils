@@ -1,9 +1,11 @@
 package br.dev.juniorlatalisa.utils;
 
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -383,4 +385,22 @@ public class StringUtils {
 		}
 		return true;
 	}
+
+	// FILES
+
+	/**
+	 * @see FileUtils#read(InputStream)
+	 */
+	public static String read(InputStream is, Charset charset) {
+		return new String(FileUtils.read(is), charset);
+	}
+
+	/**
+	 * @see FileUtils#read(InputStream)
+	 * @see StandardCharsets#UTF_8
+	 */
+	public static String read(InputStream is) {
+		return new String(FileUtils.read(is), StandardCharsets.UTF_8);
+	}
+
 }
