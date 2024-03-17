@@ -295,6 +295,11 @@ public class StringUtils {
 		return false;
 	}
 
+	public static String encodeHEX(String value) {
+		final var buffer = value.getBytes(StandardCharsets.UTF_8);
+		return encodeHEX(buffer);
+	}
+
 	public static String encodeHEX(byte[] value) {
 		return DatatypeConverter.printHexBinary(value).toLowerCase();
 	}
@@ -386,7 +391,7 @@ public class StringUtils {
 		return true;
 	}
 
-	// FILES
+	// FileUtils
 
 	/**
 	 * @see FileUtils#read(InputStream)
@@ -401,6 +406,20 @@ public class StringUtils {
 	 */
 	public static String read(InputStream is) {
 		return new String(FileUtils.read(is), StandardCharsets.UTF_8);
+	}
+
+	// CryptoUtils
+
+	public static String sha256(String value) {
+		final var buffer = value.getBytes(StandardCharsets.UTF_8);
+		final var encrypted = CryptoUtils.encrypt(buffer, Constants.SHA256_ALGORITHM);
+		return encodeBase64(encrypted);
+	}
+
+	public static String md5(String value) {
+		final var buffer = value.getBytes(StandardCharsets.UTF_8);
+		final var encrypted = CryptoUtils.encrypt(buffer, Constants.MD5_ALGORITHM);
+		return encodeBase64(encrypted);
 	}
 
 }
