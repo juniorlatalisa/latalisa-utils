@@ -345,11 +345,19 @@ public class StringUtils {
 		return converter.apply(decodeBase64(value));
 	}
 
+	public static String stringFromBase64(String value) {
+		return new String(decodeBase64(value), StandardCharsets.UTF_8);
+	}
+
 	/**
 	 * @see Encoder#encodeToString(byte[])
 	 */
 	public static String encodeBase64(byte[] value) {
 		return Base64.getEncoder().encodeToString(value);
+	}
+
+	public static String encodeBase64(String value) {
+		return encodeBase64(value.getBytes(StandardCharsets.UTF_8));
 	}
 
 	/**
