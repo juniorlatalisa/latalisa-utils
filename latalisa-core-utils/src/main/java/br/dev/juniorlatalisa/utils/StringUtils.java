@@ -364,14 +364,18 @@ public class StringUtils {
 	 * @see Jsonb#toJson(Object)
 	 */
 	public static String encodeJSON(Object value) {
-		return getJsonb().toJson(value);
+		return getJsonb(true).toJson(value);
+	}
+
+	public static String encodeJSON(Object value, boolean formatted) {
+		return getJsonb(formatted).toJson(value);
 	}
 
 	/**
 	 * @see Jsonb#fromJson(String, Class)
 	 */
 	public static <T> T decodeJSON(String value, Class<T> clazz) {
-		return getJsonb().fromJson(value, clazz);
+		return getJsonb(false).fromJson(value, clazz);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -379,12 +383,22 @@ public class StringUtils {
 		return (T[]) decodeJSON(value, Array.newInstance(clazz, 0).getClass());
 	}
 
-	private static Jsonb jsonb = null;
+	private static Jsonb jsonbDefault = null;
+	private static Jsonb jsonbFormatting = null;
 
-	private static Jsonb getJsonb() {
-		if (jsonb == null) {
-			final JsonbConfig config = new JsonbConfig().withFormatting(true);
-			jsonb = JsonbBuilder.create(config);
+	private static Jsonb getJsonb(final boolean formatted) {
+		final Jsonb jsonb;
+		if (formatted) {
+			if (jsonbFormatting == null) {
+				final JsonbConfig config = new JsonbConfig().withFormatting(true);
+				jsonbFormatting = JsonbBuilder.create(config);
+			}
+			jsonb = jsonbFormatting;
+		} else {
+			if (jsonbDefault == null) {
+				jsonbDefault = JsonbBuilder.create();
+			}
+			jsonb = jsonbDefault;
 		}
 		return jsonb;
 	}
