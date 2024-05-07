@@ -8,14 +8,10 @@ import javax.persistence.PersistenceException;
 import br.dev.juniorlatalisa.builders.ComparatorBuilder;
 
 @FunctionalInterface
-public interface Identificavel<T extends Serializable> extends Serializable {
+public interface Identificavel<T extends Serializable & Comparable<T>> extends Serializable {
 
-	@SuppressWarnings("unchecked")
-	Comparator<Identificavel<? extends Comparable<? extends Serializable>>> COMPARATOR_POR_IDENTIFICADOR = //
-			new ComparatorBuilder<Identificavel<? extends Comparable<? extends Serializable>>>()
-					.add(Identificavel::getIdentificador,
-							(value1, value2) -> ((Comparable<Serializable>) value1).compareTo(value2))
-					.build();
+	Comparator<Identificavel<?>> COMPARATOR_POR_IDENTIFICADOR = //
+			ComparatorBuilder.build(Identificavel::getIdentificador);
 
 	int DEFAULT_MAX_SIZE = 255;
 	String NOT_EMPTY_MESSAGE = "{entidade.identificador.notempty}";

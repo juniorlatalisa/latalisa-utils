@@ -6,11 +6,9 @@ import java.util.Comparator;
 import br.dev.juniorlatalisa.builders.ComparatorBuilder;
 
 @FunctionalInterface
-public interface Codificavel<T extends Number> extends Serializable {
+public interface Codificavel<T extends Number & Comparable<T>> extends Serializable {
 
-	@SuppressWarnings("unchecked")
-	Comparator<Codificavel<? extends Number>> COMPARATOR_POR_CODIGO = new ComparatorBuilder<Codificavel<? extends Number>>()
-			.add(value -> (Comparable<Object>) value.getCodigo(), Comparable::compareTo).build();
+	Comparator<Codificavel<?>> COMPARATOR_POR_CODIGO = ComparatorBuilder.build(Codificavel::getCodigo);
 
 	String FIELD_NAME_CODIGO = "codigo";
 
