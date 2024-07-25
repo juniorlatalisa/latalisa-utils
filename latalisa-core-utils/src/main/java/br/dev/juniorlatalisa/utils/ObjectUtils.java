@@ -103,6 +103,55 @@ public final class ObjectUtils {
 		return value == null || value.doubleValue() == 0.0;
 	}
 
+	@SafeVarargs
+	public static boolean isAnyEmpty(CharSequence... values) {
+		for (CharSequence value : values) {
+			if (isEmpty(value)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@SafeVarargs
+	public static boolean isAllEmpty(CharSequence... values) {
+		for (CharSequence value : values) {
+			if (!isEmpty(value)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@SafeVarargs
+	public static <T> boolean isAnyEquals(T base, T... values) {
+		if (base == null) {
+			return false;
+		}
+		for (T value : values) {
+			if (value == null) {
+				continue;
+			}
+			if (base.equals(value)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	@SafeVarargs
+	public static <T> boolean isAllEquals(T base, T... values) {
+		if (base == null) {
+			return false;
+		}
+		for (T value : values) {
+			if (value == null || !base.equals(value)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public static Throwable getCause(Throwable throwable) {
 		if (throwable.getCause() == null || throwable.equals(throwable.getCause())) {
 			return throwable.getCause() == null ? throwable : throwable.getCause();
