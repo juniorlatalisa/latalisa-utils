@@ -43,6 +43,23 @@ public abstract class JPAQueryMultiDataBase<E extends Entidade> extends JPAQuery
 		return em;
 	}
 
+	protected JPAFactoryBuilder createJPAFactoryBuilder(DataSource dataSource, String persistenceUnitName,
+			boolean generateStatistics, boolean eventsLog, boolean jmxEnabled) {
+		return new JPAFactoryBuilder() //
+				.setDataSource(dataSource) //
+				.setPersistenceUnitName(persistenceUnitName) //
+				.setPersistenceProviderClassName(HibernatePersistenceProvider.class.getName()) //
+				.setTransactionType(PersistenceUnitTransactionType.RESOURCE_LOCAL) //
+				.setProperty("hibernate.generate_statistics", Boolean.toString(generateStatistics)) //
+				.setProperty("hibernate.session.events.log", Boolean.toString(eventsLog)) //
+				.setProperty("hibernate.jmx.enabled", Boolean.toString(jmxEnabled)) //
+		;
+	}
+
+	protected JPAFactoryBuilder createJPAFactoryBuilder(DataSource dataSource, String persistenceUnitName) {
+		return createJPAFactoryBuilder(dataSource, persistenceUnitName, true, false, true);
+	}
+
 	protected EntityManagerFactory createEntityManagerFactory(String persistenceUnitName) {
 		final DataSource dataSource;
 		try {
@@ -52,16 +69,9 @@ public abstract class JPAQueryMultiDataBase<E extends Entidade> extends JPAQuery
 		}
 		final List<String> managedClassNames = getMappedClasses().values().stream().map(Class::getCanonicalName)
 				.sorted().collect(Collectors.toList());
-		return new JPAFactoryBuilder() //
-				.setDataSource(dataSource) //
-				.setPersistenceUnitName(persistenceUnitName) //
-				.setPersistenceProviderClassName(HibernatePersistenceProvider.class.getName()) //
-				.setTransactionType(PersistenceUnitTransactionType.RESOURCE_LOCAL) //
-				.setProperty("hibernate.generate_statistics", "true") //
-				.setProperty("hibernate.session.events.log", "false") //
-				.setProperty("hibernate.jmx.enabled", "true") //
+		return createJPAFactoryBuilder(dataSource, persistenceUnitName) //
 				.setManagedClassNames(managedClassNames) //
-				.build(); //
+				.build();
 	}
 
 	protected EntityManagerFactory getEntityManagerFactory(String persistenceUnitName) {
