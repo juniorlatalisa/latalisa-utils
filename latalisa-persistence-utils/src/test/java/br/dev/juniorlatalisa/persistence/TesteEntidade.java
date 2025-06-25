@@ -3,6 +3,8 @@ package br.dev.juniorlatalisa.persistence;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -35,6 +37,10 @@ public abstract class TesteEntidade<E extends Serializable> {
 
 	public static EntityManagerFactory getEntityManagerFactory() {
 		return factory;
+	}
+
+	public static LocalDateTime now() {
+		return LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 	}
 
 	/**
