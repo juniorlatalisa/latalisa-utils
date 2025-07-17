@@ -8,6 +8,9 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -157,5 +160,13 @@ public final class ObjectUtils {
 			return throwable.getCause() == null ? throwable : throwable.getCause();
 		}
 		return getCause(throwable.getCause());
+	}
+
+	public static LocalDateTime now() {
+		return LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
+	}
+
+	public static LocalDateTime today() {
+		return LocalDate.now().atStartOfDay();
 	}
 }

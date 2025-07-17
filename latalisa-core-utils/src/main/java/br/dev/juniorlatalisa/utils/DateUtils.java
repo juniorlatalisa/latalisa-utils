@@ -19,6 +19,7 @@ import br.dev.juniorlatalisa.Constants;
 public final class DateUtils {
 
 	private DateUtils() {
+		throw new IllegalArgumentException();
 	}
 
 	public static <T> T dateToAnyDateTime(Date date, BiFunction<Instant, ZoneId, T> function) {
