@@ -20,12 +20,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.DatatypeConverter;
 
 import br.dev.juniorlatalisa.Constants;
@@ -37,6 +41,7 @@ import br.dev.juniorlatalisa.builders.MapBuilder;
 public class StringUtils {
 
 	private StringUtils() {
+		throw new IllegalArgumentException();
 	}
 
 	private static final Map<String, DecimalFormat> decimalFormat = new HashMap<>();
@@ -430,18 +435,46 @@ public class StringUtils {
 		return new String(FileUtils.read(is), StandardCharsets.UTF_8);
 	}
 
+	@SafeVarargs
+	public static String join(@NotNull Object value, Object... values) {
+		return Stream.concat(Stream.of(value), Stream.of(values)).filter(Objects::nonNull).map(Object::toString)
+				.collect(Collectors.joining());
+	}
+
+	@SafeVarargs
+	public static String joinWithDelimiter(@NotNull CharSequence delimiter, @NotNull Object value, Object... values) {
+		return Stream.concat(Stream.of(value), Stream.of(values)).filter(Objects::nonNull).map(Object::toString)
+				.collect(Collectors.joining(delimiter));
+	}
+
 	// CryptoUtils
 
-	public static String sha256(String value) {
-		final var buffer = value.getBytes(StandardCharsets.UTF_8);
+	@SafeVarargs
+	public static String sha256base64(@NotNull Object value, Object... values) {
+		final var buffer = join(value, values).getBytes(StandardCharsets.UTF_8);
 		final var encrypted = CryptoUtils.encrypt(buffer, Constants.SHA256_ALGORITHM);
 		return encodeBase64(encrypted);
 	}
 
-	public static String md5(String value) {
-		final var buffer = value.getBytes(StandardCharsets.UTF_8);
+	@SafeVarargs
+	public static String sha256hexa(@NotNull Object value, Object... values) {
+		final var buffer = join(value, values).getBytes(StandardCharsets.UTF_8);
+		final var encrypted = CryptoUtils.encrypt(buffer, Constants.SHA256_ALGORITHM);
+		return encodeHEX(encrypted);
+	}
+
+	@SafeVarargs
+	public static String md5base64(@NotNull Object value, Object... values) {
+		final var buffer = join(value, values).getBytes(StandardCharsets.UTF_8);
 		final var encrypted = CryptoUtils.encrypt(buffer, Constants.MD5_ALGORITHM);
 		return encodeBase64(encrypted);
+	}
+
+	@SafeVarargs
+	public static String md5hexa(@NotNull Object value, Object... values) {
+		final var buffer = join(value, values).getBytes(StandardCharsets.UTF_8);
+		final var encrypted = CryptoUtils.encrypt(buffer, Constants.MD5_ALGORITHM);
+		return encodeHEX(encrypted);
 	}
 
 }
