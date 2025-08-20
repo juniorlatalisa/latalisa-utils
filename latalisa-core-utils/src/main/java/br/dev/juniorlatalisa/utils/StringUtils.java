@@ -477,4 +477,16 @@ public class StringUtils {
 		return encodeHEX(encrypted);
 	}
 
+	public static String toString(final Object value, final String defaultValue) {
+		return value == null ? defaultValue : value.toString();
+	}
+
+	public static String toString(final Object value) {
+		return toString(value, null);
+	}
+
+	public static <T> T fromString(final String value, Function<String, T> fn) {
+		return value == null || fn == null ? null : fn.apply(value);
+	}
+
 }
