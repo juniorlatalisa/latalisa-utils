@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -41,7 +42,7 @@ public final class FileUtils {
 		try {
 			return file.openConnection().getContentType();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -53,7 +54,7 @@ public final class FileUtils {
 		try {
 			return getContentType(file.toURI().toURL());
 		} catch (MalformedURLException e) {
-			throw new RuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -66,7 +67,54 @@ public final class FileUtils {
 		try {
 			return Files.createDirectories(Paths.get(root, more));
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	/**
+	 * Garante que o diretório especificado exista, criando-o caso necessário.
+	 * <p>
+	 * Esta versão recebe um diretório raiz e segmentos adicionais de caminho,
+	 * construindo um {@link Path} e delegando para
+	 * {@link #createDirectoriesIfNeeded(Path)}.
+	 * </p>
+	 *
+	 * @param root diretório raiz a partir do qual o caminho será construído
+	 * @param more segmentos adicionais do caminho (subdiretórios)
+	 * @return o {@link Path} representando o diretório existente ou recém-criado
+	 * @throws UncheckedIOException se ocorrer um erro de I/O ao criar os diretórios
+	 */
+	@SafeVarargs
+	public static Path createDirectoriesIfNeeded(String root, String... more) {
+		return createDirectoriesIfNeeded(Paths.get(root, more));
+	}
+
+	/**
+	 * Garante que o diretório especificado exista, criando-o caso necessário.
+	 * <p>
+	 * Se o caminho já existir, ele é retornado diretamente. Caso contrário, os
+	 * diretórios necessários são criados utilizando
+	 * {@link Files#createDirectories(Path)}.
+	 * </p>
+	 *
+	 * <p>
+	 * Qualquer {@link IOException} gerada durante a criação dos diretórios é
+	 * encapsulada em uma {@link UncheckedIOException}, permitindo que o método seja
+	 * usado sem necessidade de tratamento explícito de exceções checadas.
+	 * </p>
+	 *
+	 * @param path caminho do diretório a ser verificado/criado
+	 * @return o {@link Path} representando o diretório existente ou recém-criado
+	 * @throws UncheckedIOException se ocorrer um erro de I/O ao criar os diretórios
+	 *
+	 * @see java.nio.file.Files#createDirectories(Path)
+	 * @see java.nio.file.Files#exists(Path)
+	 */
+	public static Path createDirectoriesIfNeeded(Path path) {
+		try {
+			return Files.exists(path) ? path : Files.createDirectories(path);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -91,7 +139,7 @@ public final class FileUtils {
 		try {
 			return Files.createDirectories(retorno);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -103,7 +151,7 @@ public final class FileUtils {
 		try {
 			return Files.readAllBytes(path);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -115,7 +163,7 @@ public final class FileUtils {
 		try {
 			return read(url.openStream(), 512);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 
@@ -136,7 +184,7 @@ public final class FileUtils {
 				is.close();
 			}
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 		return out.toByteArray();
 	}
@@ -149,7 +197,7 @@ public final class FileUtils {
 		try {
 			Files.write(path, bytes, options);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new UncheckedIOException(e);
 		}
 	}
 
