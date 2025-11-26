@@ -1,7 +1,10 @@
 package br.dev.juniorlatalisa.utils;
 
+import java.awt.FileDialog;
+import java.awt.Frame;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -13,6 +16,12 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
+import javax.swing.filechooser.FileFilter;
 
 import br.dev.juniorlatalisa.Constants;
 
@@ -228,4 +237,88 @@ public final class FileUtils {
 	public static String checksum(InputStream is) {
 		return checksum(read(is, -1), Constants.SHA256_ALGORITHM);
 	}
+
+	/**
+	 * Exibe um diálogo de seleção de arquivo utilizando Swing (JFileChooser).
+	 *
+	 * <p>
+	 * Este método abre uma janela de seleção de arquivos/pastas com suporte a
+	 * filtros personalizados via {@link javax.swing.filechooser.FileFilter}. É
+	 * ideal quando se deseja aplicar regras mais sofisticadas de filtragem ou
+	 * permitir a seleção de diretórios.
+	 * </p>
+	 *
+	 * @param title             título exibido na barra do diálogo
+	 * @param filter            filtro de arquivos (pode ser {@code null} para não
+	 *                          aplicar filtro)
+	 * @param fileSelectionMode modo de seleção: {@link JFileChooser#FILES_ONLY},
+	 *                          {@link JFileChooser#DIRECTORIES_ONLY} ou
+	 *                          {@link JFileChooser#FILES_AND_DIRECTORIES}
+	 * @return o arquivo ou diretório selecionado, ou {@code null} se o usuário
+	 *         cancelar
+	 */
+
+	public static File showOpenDialog(final String title, final FileFilter filter, final int fileSelectionMode) {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			// Não fazer nada
+		}
+		final JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		try {
+			final JFileChooser chooser = new JFileChooser();
+			chooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+			chooser.setFileSelectionMode(fileSelectionMode);
+			chooser.setDialogTitle(title);
+			if (filter != null) {
+				chooser.setFileFilter(filter);
+			}
+			final int result = chooser.showOpenDialog(frame);
+			if (result == JFileChooser.APPROVE_OPTION) {
+				return chooser.getSelectedFile();
+			}
+		} finally {
+			frame.dispose();
+		}
+		return null;
+	}
+
+	/**
+	 * Exibe um diálogo de seleção de arquivo utilizando AWT (FileDialog).
+	 *
+	 * <p>
+	 * Este método abre o seletor nativo do sistema operacional, com suporte a
+	 * filtros simples via {@link java.io.FilenameFilter}. É mais leve e integrado
+	 * ao SO, mas não permite seleção de diretórios.
+	 * </p>
+	 *
+	 * @param title  título exibido na barra do diálogo
+	 * @param filter filtro de nomes de arquivos (pode ser {@code null} para não
+	 *               aplicar filtro)
+	 * @return o arquivo selecionado, ou {@code null} se o usuário cancelar
+	 */
+
+	public static File showOpenDialog(final String title, final FilenameFilter filter) {
+		final Frame frame = new Frame();
+		try {
+			final FileDialog dialog = new FileDialog(frame, title, FileDialog.LOAD);
+			dialog.setDirectory(System.getProperty("user.home"));
+			dialog.setModal(true);
+			dialog.setAlwaysOnTop(true);
+			if (filter != null) {
+				dialog.setFilenameFilter(filter);
+			}
+			dialog.setVisible(true);
+			final String file = dialog.getFile();
+			final String dir = dialog.getDirectory();
+			if (file != null && dir != null) {
+				return new File(dir, file);
+			}
+		} finally {
+			frame.dispose();
+		}
+		return null;
+	}
+
 }
