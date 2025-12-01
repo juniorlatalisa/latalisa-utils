@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import javax.persistence.PersistenceException;
+import javax.validation.constraints.NotNull;
 
 import br.dev.juniorlatalisa.builders.ComparatorBuilder;
 
@@ -20,7 +21,7 @@ public interface Nomeavel extends Serializable {
 
 	String getNome();
 
-	default void setNome(String nome) {
+	default void setNome(@NotNull String nome) {
 		throw new PersistenceException(nome);
 	}
 }

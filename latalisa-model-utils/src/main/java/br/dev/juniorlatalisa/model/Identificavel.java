@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import javax.persistence.PersistenceException;
+import javax.validation.constraints.NotNull;
 
 import br.dev.juniorlatalisa.builders.ComparatorBuilder;
 
@@ -18,7 +19,7 @@ public interface Identificavel<T extends Serializable & Comparable<T>> extends S
 
 	T getIdentificador();
 
-	default void setIdentificador(T identificador) {
+	default void setIdentificador(@NotNull T identificador) {
 		throw new PersistenceException();
 	}
 }

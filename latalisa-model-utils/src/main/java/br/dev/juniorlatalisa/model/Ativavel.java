@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import javax.persistence.PersistenceException;
+import javax.validation.constraints.NotNull;
 
 import br.dev.juniorlatalisa.builders.ComparatorBuilder;
 
@@ -16,7 +17,7 @@ public interface Ativavel extends Serializable {
 
 	Boolean getAtivo();
 
-	default void setAtivo(Boolean ativo) {
+	default void setAtivo(@NotNull Boolean ativo) {
 		throw new PersistenceException();
 	}
 
