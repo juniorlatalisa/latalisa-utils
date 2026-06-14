@@ -169,7 +169,6 @@ public abstract class TesteEntidade<E extends Serializable> {
 
 	@SuppressWarnings("unchecked")
 	protected E pesquisar(E entidade) {
-		;
 		return (E) getJPAQuery().read(entidade.getClass(), getPrimaryKey(entidade));
 	}
 
@@ -177,9 +176,13 @@ public abstract class TesteEntidade<E extends Serializable> {
 		return getJPAQuery().delete(entidade.getClass(), getPrimaryKey(entidade));
 	}
 
+	protected E desatachar(E entidade) {
+		return getJPAQuery().detach(entidade);
+	}
+
 	@Test
 	public void basico() {
-		E entidade1 = criar();
+		final E entidade1 = desatachar(criar());
 
 		E entidade2;
 

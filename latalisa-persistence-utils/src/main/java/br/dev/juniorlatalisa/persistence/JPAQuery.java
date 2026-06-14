@@ -66,7 +66,7 @@ public abstract class JPAQuery implements QueryFacade {
 			int maxResults) {
 		Query query = createQuery(queryStrategy, queryValue, params);
 		setParams(queryStrategy, query, params, startResult, maxResults);
-		getEntityManager().clear();
+//		getEntityManager().clear();
 		return query.getResultList();
 	}
 
@@ -137,8 +137,18 @@ public abstract class JPAQuery implements QueryFacade {
 		return entity;
 	}
 
+	public <T extends Serializable> T detach(T entity) {
+		getEntityManager().detach(entity);
+		return entity;
+	}
+
+	public <T extends Serializable> T refresh(T entity) {
+		getEntityManager().refresh(entity);
+		return entity;
+	}
+
 	public <T extends Serializable> T read(Class<T> entityClass, Serializable primaryKey) {
-		getEntityManager().clear();
+//		getEntityManager().clear();
 		return getEntityManager().find(entityClass, primaryKey);
 	}
 
